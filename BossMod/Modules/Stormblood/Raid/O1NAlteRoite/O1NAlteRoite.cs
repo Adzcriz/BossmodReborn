@@ -1,4 +1,5 @@
 using System.ComponentModel.Design.Serialization;
+using System.Drawing;
 using System.Reflection.Metadata;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks.Dataflow;
@@ -26,18 +27,27 @@ public enum AID : uint
     Blaze = 9185, // Boss->players, 5.0s cast, range 6 circle
     TheClassicalElements = 9184, // Boss->self, 5.0s cast, single-target
     Downburst = 7896, // Boss->self, 5.0s cast, single-target
+    Turbulence = 9603, // 18D6->self, no cast, range 5 circle
+    Charybdis = 9179, // Boss->self, 5.0s cast, range 100 circle
+    Levinbolt1 = 9178, // 18D6->self, no cast, range 6 circle
+   
 }
 sealed class Roar(BossModule module) : Components.RaidwideCast(module, (uint)AID.Roar);
 sealed class ThinIce(BossModule module) : Components.ThinIce(module, 6f, true, (uint)SID.ThinIce, true);
 sealed class Burn(BossModule module) : Components.SimpleAOEs(module, (uint)AID.Burn, new AOEShapeCircle(8f));
+sealed class Levinbolt1(BossModule module) : Components.SimpleAOEs(module, (uint)AID.Levinbolt1, new AOEShapeCircle(6f));
 sealed class BreathWing(BossModule module) : Components.SimpleKnockbacks(module, (uint)AID.BreathWing, 10f, kind: Kind.DirForward, stopAtWall: true);
-    sealed class WyrmTail(BossModule module) : Components.SingleTargetCast(module, (uint)AID.WyrmTail);
-    sealed class Downburst(BossModule module) : Components.VoidzoneAtCastTarget(module, 6f, (uint)AID.Downburst, m => new[] { m.PrimaryActor });
+sealed class WyrmTail(BossModule module) : Components.SingleTargetCast(module, (uint)AID.WyrmTail);
 sealed class TwinBolt(BossModule module) : Components.SingleTargetCast(module, (uint)AID.TwinBolt);
-sealed class Blaze(BossModule module) : Components.StackTogether(module, iconId: 96, activationDelay: 5.0f, radius: 6f);
-    sealed class Levinbolt(BossModule module) : Components.GenericStackSpread(module);
-sealed class Clamp(BossModule module) : Components.Cleave(module, (uint)AID.Clamp, new AOEShapeRect(9f, 10f));
+sealed class Blaze(BossModule module) : Components.StackTogether(module, (uint)AID.Blaze, activationDelay: 5.0f, radius: 6f);
+sealed class Levinbolt(BossModule module) : Components.SpreadFromCastTargets(module, (uint)AID.Levinbolt, 6f);
+class Clamp(BossModule module) : Components.SimpleKnockbacks(module, (uint)AID.Clamp, 10f, kind: Kind.DirForward, new AOEShapeRect(10f, 9f), stopAtWall: true);
+   
 sealed class Flame(BossModule module) : Components.RaidwideCast(module, (uint)AID.Flame);
+sealed class Charybdis(BossModule module) : Components.RaidwideCast(module, (uint)AID.Charybdis);
+   
+   
+
 
 public enum SID : uint
 {
@@ -60,11 +70,12 @@ sealed class O1NAlteRoiteStates : StateMachineBuilder
             .ActivateOnEnter<BreathWing>()
             .ActivateOnEnter<ThinIce>()
             .ActivateOnEnter<WyrmTail>()
-            .ActivateOnEnter<Downburst>()
             .ActivateOnEnter<TwinBolt>()
             .ActivateOnEnter<Levinbolt>()
             .ActivateOnEnter<Clamp>()
-            .ActivateOnEnter<Flame>();
+            .ActivateOnEnter<Flame>()
+            .ActivateOnEnter<Charybdis>()
+            .ActivateOnEnter<Levinbolt1>();
     }
 }
 
