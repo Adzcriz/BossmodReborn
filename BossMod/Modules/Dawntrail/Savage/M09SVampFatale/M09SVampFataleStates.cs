@@ -25,7 +25,7 @@ sealed class M09SVampFataleStates : StateMachineBuilder
         Arena2Start(id + 0xB0000u, 5f);
         Arena2(id + 0xC0000u, 5f);
         HellInACell(id + 0xD0000u, 8.5f);
-        SanguineScratch(id + 0xE0000u, 10.5f);
+        SanguineScratch(id + 0xE0000u, 22.1f);
         Enrage(id + 0xF0000u, 2.9f);
         SimpleState(id + 0xFF0000u, 10000f, "???");
     }
@@ -57,6 +57,7 @@ sealed class M09SVampFataleStates : StateMachineBuilder
         // activate BrutalRain component at same time as Bombyre?
         CastStart(id, (uint)AID.VampStomp, delay)
             .ActivateOnEnter<VampStomp>()
+            .ActivateOnEnter<BombpyreRing>()
             .ActivateOnEnter<BlastBeat>()
             .ActivateOnEnter<CurseOfTheBombpyre>()
             .ActivateOnEnter<BrutalRain>();
@@ -69,7 +70,8 @@ sealed class M09SVampFataleStates : StateMachineBuilder
 
         // does timeline get thrown off if waiting for spreads? just keep it active, or deactivate after party stack?
         ComponentCondition<CurseOfTheBombpyre>(id + 0x30, 2f, comp => comp.Spreads.Count == 0, "Finish spreads")
-            .DeactivateOnExit<CurseOfTheBombpyre>();
+            .DeactivateOnExit<CurseOfTheBombpyre>()
+            .DeactivateOnExit<BombpyreRing>();
     }
 
     private void PreArena1(uint id, float delay)
@@ -235,52 +237,61 @@ sealed class M09SVampFataleStates : StateMachineBuilder
             .ActivateOnExit<BloodyBondage>()
             .SetHint(StateMachine.StateHint.Raidwide);
 
+        // pulping pulse
+
+        // tower spawn times likely static, using cell deaths for state can throw off timeline
+        // tower 1 start @ 396.093 -> 401.177
+        // spread & amp
+        // tower 2 start @ 418.491 -> 423.564
+        // spread & amp
+        // puddles x1 may start before all cells dead
+        // last puddles @ 447.715
+        // LP tower starts 448.939
+
+        // always puddles x2, use this to get time left into LP towers otherwise timeline can get thrown off
+        // check puddles numcasts > 10 (sets of 8)
+        // last puddles at 447.715
+        // LP tower starts 448.939
+
         // Hell In A Cell cast at exact same time as Bloody Bondage; would ActivateOnEnter work with CastStart on Hell?
         ComponentCondition<BloodyBondage>(id + 0x30, 11f, comp => comp.NumCasts > 0, "Towers (party 1)")
-            .DeactivateOnExit<BloodyBondage>()
             .ActivateOnExit<CharnelCells>()
             .ActivateOnExit<UltrasonicSpreadTank>()
             .ActivateOnExit<UltrasonicSpreadRest>()
-            .ActivateOnExit<UltrasonicAmp>();
-
-        ComponentCondition<CharnelCells>(id + 0x40, 1.6f, comp => comp.ActiveActors.Count != 0, "Cells targetable");
-        ComponentCondition<CharnelCells>(id + 0x50, 22.1f, comp => comp.ActiveActors.Count == 0, "Cells (party 1)")
-            .DeactivateOnExit<CharnelCells>()
-            .ActivateOnExit<BloodyBondage>();
+            .ActivateOnExit<UltrasonicAmp>()
+            .DeactivateOnExit<PulpingPulse>();
 
         // 2nd tower spawn time static or relative to previous cells killed?
-        ComponentCondition<BloodyBondage>(id + 0x60, 10.1f, comp => comp.NumCasts > 0, "Towers (party 2)")
-            .DeactivateOnExit<BloodyBondage>()
-            .ActivateOnExit<CharnelCells>();
+        ComponentCondition<BloodyBondage>(id + 0x40, 22.4f, comp => comp.NumCasts > 4, "Towers (party 2)")
+            .ActivateOnEnter<PulpingPulse>()
+            .ActivateOnExit<CharnelCells>()
+            .DeactivateOnExit<BloodyBondage>();
 
-        ComponentCondition<CharnelCells>(id + 0x70, 1.6f, comp => comp.ActiveActors.Count != 0, "Cells targetable");
-        ComponentCondition<CharnelCells>(id + 0x80, 22.1f, comp => comp.ActiveActors.Count == 0, "Cells (party 2)")
+        ComponentCondition<PulpingPulse>(id + 0x50, 24.2f, comp => comp.NumCasts > 10)
+            .ActivateOnExit<BloodyBondageUndeadDeathmatch>()
             .DeactivateOnExit<CharnelCells>()
             .DeactivateOnExit<UltrasonicSpreadTank>()
             .DeactivateOnExit<UltrasonicSpreadRest>()
-            .DeactivateOnExit<UltrasonicAmp>()
-            .ActivateOnExit<BloodyBondageUndeadDeathmatch>();
+            .DeactivateOnExit<UltrasonicAmp>();
 
         // spawns 2 vampettes 440.106 to use later for sanguince scratch
+
+        ComponentCondition<BloodyBondageUndeadDeathmatch>(id + 0x60, 6.2f, comp => comp.NumCasts > 0, "Light party towers")
+            .DeactivateOnExit<BloodyBondageUndeadDeathmatch>()
+            .ActivateOnExit<SanguineScratch>()
+            .ActivateOnExit<BreakdownWing>();
     }
 
     private void SanguineScratch(uint id, float delay)
     {
-        ComponentCondition<BloodyBondageUndeadDeathmatch>(id, delay, comp => comp.NumCasts > 0, "Light party towers")
-            .DeactivateOnExit<BloodyBondageUndeadDeathmatch>()
-            .ActivateOnExit<SanguineScratch>()
-            //.ActivateOnExit<BreakdownDrop>()
-            //.ActivateOnExit<BreakwingBeat>()
-            .ActivateOnExit<BreakdownWing>();
-
-        ComponentCondition<BreakdownWing>(id + 0x10, 22.1f, comp => comp.NumCasts > 0, "Bat explosion 1");
-        ComponentCondition<BreakdownWing>(id + 0x20, 21.3f, comp => comp.NumCasts > 2, "Bat explosion 2")
+        ComponentCondition<BreakdownWing>(id, delay, comp => comp.NumCasts > 0, "Bat explosion 1");
+        ComponentCondition<BreakdownWing>(id + 0x10, 21.3f, comp => comp.NumCasts > 2, "Bat explosion 2")
             .DeactivateOnExit<SanguineScratch>()
             .DeactivateOnExit<BreakdownWing>()
             .ActivateOnExit<BrutalRain>();
 
-        ComponentCondition<BrutalRain>(id + 0x30, 1.7f, comp => comp.Stacks.Count > 0, "Party stack");
-        ComponentCondition<BrutalRain>(id + 0x40, 10f, comp => comp.Stacks.Count == 0, "Stack resolve")
+        ComponentCondition<BrutalRain>(id + 0x20, 1.7f, comp => comp.Stacks.Count > 0, "Party stack");
+        ComponentCondition<BrutalRain>(id + 0x30, 10f, comp => comp.Stacks.Count == 0, "Stack resolve")
             .DeactivateOnExit<BrutalRain>()
             .ActivateOnExit<HalfMoon>();
     }
@@ -302,7 +313,8 @@ sealed class M09SVampFataleStates : StateMachineBuilder
         // sanguine scratch, no bats, only 1 set
         // insatiable thirst start 565.273
         // can't do cast start check for insatiable since boss casts sanguine first; check for both casts in order or wait for sanguine to end
-        ComponentCondition<SanguineScratch>(id + 0x40, 21.9f, comp => comp.NumCasts >= 40);
+        ComponentCondition<SanguineScratch>(id + 0x40, 21.9f, comp => comp.NumCasts >= 40)
+            .DeactivateOnExit<SanguineScratch>();
 
         Cast(id + 0x50, (uint)AID.InsatiableThirstCast, 4.6f, 2.8f)
             .ActivateOnEnter<InsatiableThirst>();

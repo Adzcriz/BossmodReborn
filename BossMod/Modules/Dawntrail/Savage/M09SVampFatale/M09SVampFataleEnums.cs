@@ -10,9 +10,9 @@ public enum OID : uint
     FatalFlail = 0x4AE1, // R3.000, x0 (spawn during fight)
     Neckbiter = 0x4AF5, // R3.000, x0 (spawn during fight)
     CoffinmakerSmall = 0x4AF6, // R1.000, x0 (spawn during fight)
-    CharnelCell = 0x4AF3, // R4.000, x0 (spawn during fight)
-    CharnelCell1 = 0x4AF4, // R4.000, x0 (spawn during fight)
-    CharnelCell2 = 0x4AE3, // R4.000, x0 (spawn during fight)
+    CharnelCell = 0x4AF3, // R4.000, x0 (spawn during fight), for healer?
+    CharnelCell1 = 0x4AF4, // R4.000, x0 (spawn during fight), for dps?
+    CharnelCell2 = 0x4AE3, // R4.000, x0 (spawn during fight), for tanks?
 }
 
 public enum AID : uint
@@ -23,6 +23,7 @@ public enum AID : uint
     HardcoreBig = 45952, // Helper->players, 5.0s cast, range 15 circle
     _Ability_VampStomp = 45898, // VampFatale->location, 4.1+0.9s cast, single-target
     VampStomp = 45940, // Helper->self, 5.0s cast, range 10 circle
+    VampStompRing = 45940, // Helper->self, no cast, single-target
     BlastBeatPlayer = 45942, // Helper->players, no cast, range 8 circle
     BlastBeatVampette = 45941, // 4C2F->self, 1.0s cast, range 8 circle
     BrutalRainCast = 45917, // VampFatale->self, 3.8+1.2s cast, single-target

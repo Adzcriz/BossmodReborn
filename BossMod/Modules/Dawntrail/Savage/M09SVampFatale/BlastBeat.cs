@@ -2,19 +2,6 @@
 
 sealed class BlastBeat(BossModule module) : Components.GenericAOEs(module)
 {
-    // vamplette actors created at start of fight
-    // bats have action timeline 0x11D1, rotations already assigned, doesn't change until after status gained
-    // check for renderflag -> 0 or timeline for visibility
-    // becomes visible 4.5s before they all gain a VampetteDistance status with extra
-    // better to draw based on time since start of mech and status extra?
-    // gains status at 29.997 (30s)
-    // Vamp Stomp resolves 30.5s
-    // close bats explode 34.63s x2
-    // mid bats explode 38.20s x3
-    // far bats explode 41.68 x5
-    // 3.5s between bat explosions; circle starts growing at 31s?
-    // nothing appears for growing circle, may have to do that manually
-
     class Vampette
     {
         public Actor Actor;
@@ -37,6 +24,7 @@ sealed class BlastBeat(BossModule module) : Components.GenericAOEs(module)
         var len = vamps.Length;
         List<AOEInstance> aoes = [];
 
+        // delay displaying bat blast longer? for easier debuff popping
         for (var i = 0; i < len; i++)
         {
             if (vamps[i].Activation == default)
@@ -106,6 +94,7 @@ sealed class BlastBeat(BossModule module) : Components.GenericAOEs(module)
     }
 }
 
+// show spreads based on proximity to ring?
 sealed class CurseOfTheBombpyre(BossModule module) : Components.GenericStackSpread(module)
 {
     public override void OnStatusGain(Actor actor, ref ActorStatus status)
@@ -129,5 +118,38 @@ sealed class CurseOfTheBombpyre(BossModule module) : Components.GenericStackSpre
                 }
             }
         }
+    }
+}
+
+sealed class BombpyreRing(BossModule module) : BossComponent(module)
+{
+    private DateTime _start;
+    private float _radius;
+    public override void OnEventCast(Actor caster, ActorCastEvent spell)
+    {
+        if (spell.Action.ID == (uint)AID.VampStompRing)
+        {
+            _start = WorldState.CurrentTime;
+        }
+    }
+
+    public override void Update()
+    {
+        if (_start == default)
+            return;
+
+        _radius = (float)((WorldState.CurrentTime - _start).TotalMilliseconds / 500);
+        if (_radius > 56.6f)
+        {
+            _start = default;
+        }
+    }
+
+    public override void DrawArenaForeground(int pcSlot, Actor pc)
+    {
+        if (_start == default)
+            return;
+
+        Arena.AddCircle(Arena.Center, _radius, Colors.Danger);
     }
 }

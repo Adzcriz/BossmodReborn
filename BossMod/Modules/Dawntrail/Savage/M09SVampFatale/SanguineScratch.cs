@@ -69,7 +69,7 @@ sealed class BreakdownWing(BossModule module) : Components.GenericAOEs(module)
 }
 //sealed class BreakdownDrop(BossModule module) : Components.SimpleAOEGroups(module, [(uint)AID.BreakdownDrop1, (uint)AID.BreakdownDrop2], 7f);
 //sealed class BreakwingBeat(BossModule module) : Components.SimpleAOEGroups(module, [(uint)AID.BreakwingBeat1, (uint)AID.BreakwingBeat2], new AOEShapeDonut(8f, 15f));
-
+/*
 sealed class SanguineScratch(BossModule module) : Components.GenericAOEs(module)
 {
     private readonly List<AOEInstance> _aoes = [];
@@ -114,5 +114,57 @@ sealed class SanguineScratch(BossModule module) : Components.GenericAOEs(module)
                 _aoes.RemoveAt(0);
             }
         }
+    }
+}
+*/
+sealed class SanguineScratch(BossModule module) : Components.GenericAOEs(module)
+{
+    private readonly List<AOEInstance> _aoes = [];
+
+    public override ReadOnlySpan<AOEInstance> ActiveAOEs(int slot, Actor actor)
+    {
+        if (_aoes.Count == 0)
+            return [];
+        return CollectionsMarshal.AsSpan(_aoes)[..1];
+    }
+
+    public override void OnCastStarted(Actor caster, ActorCastInfo spell)
+    {
+        if (spell.Action.ID == (uint)AID.SanguineScratchFirst)
+        {
+            if (_aoes.Count > 0)
+                return;
+
+            for (var i = 0; i < 5; i++)
+            {
+                _aoes.Add(new(CreateScratchCones(caster.Rotation + (22.5f * i).Degrees()), caster.Position, default, Module.CastFinishAt(spell).AddSeconds(2.4d * i)));
+            }
+        }
+    }
+
+    public override void OnEventCast(Actor caster, ActorCastEvent spell)
+    {
+        if (spell.Action.ID is (uint)AID.SanguineScratchFirst or (uint)AID.SanguineScratchRest)
+        {
+            if (_aoes.Count > 0)
+            {
+                ++NumCasts;
+                if (NumCasts % 8 == 0)
+                {
+                    _aoes.RemoveAt(0);
+                }
+            }
+        }
+    }
+
+    private AOEShapeCustom CreateScratchCones(Angle rotation)
+    {
+        var cones = new Shape[8];
+        for (var i = 0; i < cones.Length; i++)
+        {
+            cones[i] = new Cone(Arena.Center, 40f, (i * 45f - 15f).Degrees() + rotation, (i * 45f + 15f).Degrees() + rotation);
+        }
+
+        return new AOEShapeCustom(cones);
     }
 }
