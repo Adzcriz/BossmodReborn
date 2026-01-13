@@ -7,15 +7,15 @@ sealed class FireOrbsTimedFollowAOE(BossModule module) : Components.GenericAOEs(
     private static readonly AOEShapeCircle _shape = new(8f);
 
     // tune these if needed based on observed timings
-    private const float WarningSeconds = 3f;
+    private const float WarningSeconds = 5f;
 
     // inner ring: from log ~3:19 spawn, ~3:35 Burn starts, explode ~1s later => ~17s from spawn
-    private const float InnerExplodeFromSpawn = 17f;
+    private const float InnerExplodeFromSpawn = 16.84f;
 
     // outer ring: explode shortly after Breath Wing / Downburst resolves; approximate as "boss cast start + 4s"
-    // (e.g. 3s boss cast + 1s orb burn) - adjust if needed
-    private const float OuterExplodeFromBreathStart = 4f;
-
+   // outer ring explosion timings measured from replay (cast start -> orb explosion)
+    private const float OuterExplodeFromBreathStart = 9.08f;
+    private const float OuterExplodeFromDownburstStart = 12.18f;
     private record struct OrbInfo(DateTime Spawn, bool IsOuter, DateTime PredictedExplode, DateTime? ActualExplode);
 
     private readonly Dictionary<ulong, OrbInfo> _orbs = new();
@@ -56,6 +56,14 @@ sealed class FireOrbsTimedFollowAOE(BossModule module) : Components.GenericAOEs(
             return;
 
         var now = WorldState.CurrentTime;
+
+        // new orb phase: reset timing anchors so predictions don't use stale BreathWing/Downburst times
+        if (_orbs.Count == 0)
+        {
+            _firstRingSpawn = now;
+            _breathStart = default;
+            _downburstStart = default;
+        }
 
         // classify rings: first ring establishes baseline; anything spawning a few seconds later counts as "outer"
         if (_firstRingSpawn == default)
@@ -115,7 +123,7 @@ sealed class FireOrbsTimedFollowAOE(BossModule module) : Components.GenericAOEs(
     {
         // prefer the most recent known driver
         if (_downburstStart != default)
-            return _downburstStart.AddSeconds(OuterExplodeFromBreathStart);
+        return _downburstStart.AddSeconds(OuterExplodeFromDownburstStart);
         if (_breathStart != default)
             return _breathStart.AddSeconds(OuterExplodeFromBreathStart);
 
