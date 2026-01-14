@@ -20,8 +20,8 @@ public enum AID : uint
     Roar = 9180, // Boss->self, 4.0s cast, range 100 circle - Working
     Burn = 9173, // BallOfFire->self, 1.0s cast, range 8 circle
     BreathWing = 9182, // Boss->self, 5.0s cast, single-target
-    TwinBolt = 9175, // Boss->self, 5.0s cast, single-target
-    TwinBolt1 = 9176, // 18D6->player, no cast, ???
+    TwinBolt = 9175, // Boss->self, 5.0s cast, Self AOE
+    TwinBolt1 = 9176, // 18D6->player, Ranged damage mechanic of Twinbolt is handled by 'Helper' actor rather than the boss itself, the bost casts twinbold and generates an aoe around him of 5f radius. Twinbolt1 9176 
     Clamp = 9186, // Boss->self, 3.0s cast, range 9+R width 10 rect
     FlashFreeze = 9183, // Boss->self, no cast, single-target
     Levinbolt = 9177, // Boss->self, 5.0s cast, single-target

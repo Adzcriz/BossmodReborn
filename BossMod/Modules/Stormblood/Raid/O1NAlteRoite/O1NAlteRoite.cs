@@ -18,7 +18,8 @@ sealed class ClampAOE(BossModule module) : Components.SimpleAOEs(module, (uint)A
 ////////////////////////
 // Twinbolt stuff    //
 ///////////////////////
-sealed class TwinBoltTetheredBuster(BossModule module) : Components.SingleTargetCast(module, (uint)AID.TwinBolt1, hint: "Tankbuster! - Watch for Tethered Player!", AIHints.PredictedDamageType.Tankbuster);
+sealed class TwinBoltTetheredBuster(BossModule module) : Components.SingleTargetCast(module, (uint)AID.TwinBolt, hint: "Tankbuster! - Watch for Tethered Player!", AIHints.PredictedDamageType.Tankbuster);
+sealed class TwinBoltAOE(BossModule module) : Components.SimpleAOEs(module, (uint)AID.TwinBolt1, new AOEShapeCircle(5f));
 
 ////////////////////////
 // Knockbacks        //
