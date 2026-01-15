@@ -28,6 +28,8 @@ sealed class GuardianArkveldStates : StateMachineBuilder
             // Arena hazards
             .ActivateOnEnter<CrackedCrystalSmall>()
             .ActivateOnEnter<CrackedCrystalLarge>()
-            .ActivateOnEnter<WyvernsVengeance>();
+            .ActivateOnEnter<WyvernsVengeance>()
+            .ActivateOnEnter<WyvernsWealAOE>()  // the casted rect telegraph
+            .ActivateOnEnter<WyvernsWealPulses>();
     }
 }

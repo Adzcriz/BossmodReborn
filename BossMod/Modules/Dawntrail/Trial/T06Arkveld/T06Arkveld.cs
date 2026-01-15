@@ -1,12 +1,10 @@
 namespace BossMod.Dawntrail.Trial.T06Arkveld;
 
-
 // -----------------
 // Mechanics (Normal)
 // -----------------
 // This is a Normal-mode port of the already-working Extreme module.
-// We intentionally keep the logic simple: prefer built-in Components and avoid
-// Extreme-only gimmicks (e.g. limit cut / special hints).
+// We intentionally keep the logic simple
 
 // Raidwides
 sealed class Roar(BossModule module) : Components.RaidwideCasts(module, [(uint)AID.Roar, (uint)AID.Roar1]);
@@ -46,13 +44,27 @@ sealed class SteeltailThrust(BossModule module) : Components.SimpleAOEGroups(mod
 // Towers (Aetheric Resonance): small (r2) and large (r4) versions.
 // We keep soaker rules generic (1 player); damageType hints differentiate them.
 sealed class ResonanceTowerSmall(BossModule module) : Components.CastTowers(module, (uint)AID.GuardianResonance2, 2f, 1, 1);
-sealed class ResonanceTowerLarge(BossModule module) : Components.CastTowers(module, (uint)AID.GuardianResonance3, 4f, 1, 1, AIHints.PredictedDamageType.Tankbuster);
+// Tank-only tower: add AI forbidden zone for non-tanks so the helper won't step in.
+sealed class ResonanceTowerLarge(BossModule module)
+    : Components.CastTowers(module, (uint)AID.GuardianResonance3, 4f, 1, 1, AIHints.PredictedDamageType.Tankbuster)
+{
+    public override void AddAIHints(int slot, Actor actor, PartyRolesConfig.Assignment assignment, AIHints hints)
+    {
+        base.AddAIHints(slot, actor, assignment, hints);
+
+        // only MT/OT should ever enter; everyone else treats it as forbidden
+        var isTank = assignment is PartyRolesConfig.Assignment.MT or PartyRolesConfig.Assignment.OT;
+        if (isTank)
+            return;
+
+        foreach (var t in Towers)
+            hints.AddForbiddenZone(new SDCircle(t.Position, Radius), t.Activation);
+    }
+}
 
 // Crystal detonations (spawned from cracked crystals).
 sealed class CrackedCrystalSmall(BossModule module) : Components.SimpleAOEs(module, (uint)AID.WyvernsRadiance10, new AOEShapeCircle(6f));
 sealed class CrackedCrystalLarge(BossModule module) : Components.SimpleAOEs(module, (uint)AID.WyvernsRadiance11, new AOEShapeCircle(12f));
-
-
 
 [ModuleInfo(BossModuleInfo.Maturity.WIP,
 StatesType = typeof(GuardianArkveldStates),
@@ -73,5 +85,3 @@ SortOrder = 1,
 PlanLevel = 0)]
 [SkipLocalsInit]
 public sealed class GuardianArkveld(WorldState ws, Actor primary) : BossModule(ws, primary, new(100f, 100f), new ArenaBoundsCircle(20f));
-
-
