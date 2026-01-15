@@ -45,22 +45,44 @@ sealed class SteeltailThrust(BossModule module) : Components.SimpleAOEGroups(mod
 // We keep soaker rules generic (1 player); damageType hints differentiate them.
 sealed class ResonanceTowerSmall(BossModule module) : Components.CastTowers(module, (uint)AID.GuardianResonance2, 2f, 1, 1);
 // Tank-only tower: add AI forbidden zone for non-tanks so the helper won't step in.
+// Tank-only tower: forbid non-tanks as soakers (player hints + soaker counting) and add AI forbidden zone for non-tanks.
 sealed class ResonanceTowerLarge(BossModule module)
     : Components.CastTowers(module, (uint)AID.GuardianResonance3, 4f, 1, 1, AIHints.PredictedDamageType.Tankbuster)
 {
+    public override void Update()
+    {
+        base.Update();
+
+        // Build a mask of party slots that are NOT tanks -> forbidden soakers
+        BitMask forbid = default;
+        foreach (var (slot, actor) in Module.Raid.WithSlot(excludeAlliance: true, excludeNPCs: true))
+        {
+            if (actor.Role != Role.Tank)
+                forbid.Set(slot);
+        }
+
+        // Apply to all active towers (Tower is a struct; must assign back)
+        for (int i = 0; i < Towers.Count; ++i)
+        {
+            var t = Towers[i];
+            t.ForbiddenSoakers = forbid;
+            Towers[i] = t;
+        }
+    }
+
     public override void AddAIHints(int slot, Actor actor, PartyRolesConfig.Assignment assignment, AIHints hints)
     {
         base.AddAIHints(slot, actor, assignment, hints);
 
-        // only MT/OT should ever enter; everyone else treats it as forbidden
-        var isTank = assignment is PartyRolesConfig.Assignment.MT or PartyRolesConfig.Assignment.OT;
-        if (isTank)
+        // also keep the AI from walking in if it's not a tank
+        if (actor.Role == Role.Tank)
             return;
 
         foreach (var t in Towers)
             hints.AddForbiddenZone(new SDCircle(t.Position, Radius), t.Activation);
     }
 }
+
 
 // Crystal detonations (spawned from cracked crystals).
 sealed class CrackedCrystalSmall(BossModule module) : Components.SimpleAOEs(module, (uint)AID.WyvernsRadiance10, new AOEShapeCircle(6f));
