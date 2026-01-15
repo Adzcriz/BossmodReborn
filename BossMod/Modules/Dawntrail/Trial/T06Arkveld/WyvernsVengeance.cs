@@ -15,7 +15,7 @@ sealed class WyvernsVengeance(BossModule module) : Components.Exaflare(module, 6
                 Module.CastFinishAt(spell),
                 timeToMove: 1.6d,
                 explosionsLeft: 2,
-                maxShownExplosions: 2
+                maxShownExplosions: 1
             ));
             _casters.Add(caster.InstanceID);
         }
