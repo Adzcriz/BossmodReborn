@@ -30,6 +30,8 @@ sealed class GuardianArkveldStates : StateMachineBuilder
             .ActivateOnEnter<CrackedCrystalLarge>()
             .ActivateOnEnter<WyvernsVengeance>()
             .ActivateOnEnter<WyvernsWealAOE>()  // the casted rect telegraph
-            .ActivateOnEnter<WyvernsWealPulses>();
+            .ActivateOnEnter<WyvernsWealPulses>()
+            .ActivateOnEnter<WyvernsWealTurnAssist>();
+;
     }
 }
