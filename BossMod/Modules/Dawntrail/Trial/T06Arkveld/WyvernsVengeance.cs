@@ -61,7 +61,9 @@ sealed class WyvernsWealPulses(BossModule module) : Components.GenericAOEs(modul
     {
         if (spell.Action.ID == (uint)AID.WyvernsWeal2)
         {
+            // show pulse briefly
             var expiry = WorldState.FutureTime(0.8f);
+
             _aoes.Add(new AOEInstance(_shape, caster.Position, caster.Rotation, expiry));
         }
     }
