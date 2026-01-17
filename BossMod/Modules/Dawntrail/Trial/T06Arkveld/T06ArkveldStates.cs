@@ -31,7 +31,6 @@ sealed class GuardianArkveldStates : StateMachineBuilder
             .ActivateOnEnter<WyvernsVengeance>()
             .ActivateOnEnter<WyvernsWealAOE>()  // the casted rect telegraph
             .ActivateOnEnter<WyvernsWealPulses>()
-            .ActivateOnEnter<WyvernsWealTurnAssist>();
-;
+            .ActivateOnEnter<WyvernsWealIrregularCastLane>();
     }
 }
