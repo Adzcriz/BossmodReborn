@@ -83,7 +83,6 @@ sealed class ResonanceTowerLarge(BossModule module)
     }
 }
 
-
 // Crystal detonations (spawned from cracked crystals).
 sealed class CrackedCrystalSmall(BossModule module) : Components.SimpleAOEs(module, (uint)AID.WyvernsRadiance10, new AOEShapeCircle(6f));
 sealed class CrackedCrystalLarge(BossModule module) : Components.SimpleAOEs(module, (uint)AID.WyvernsRadiance11, new AOEShapeCircle(12f));
