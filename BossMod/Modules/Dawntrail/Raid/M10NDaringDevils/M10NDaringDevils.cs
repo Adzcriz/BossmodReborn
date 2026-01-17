@@ -164,15 +164,13 @@ sealed class XtremeSpectacularEdge(BossModule module) : Components.SimpleAOEs(
     module,
     (uint)AID.XtremeSpectacular2,
     new AOEShapeRect(50f, 18f));
-sealed class XtremeSpectacularHits(BossModule module) : Components.CastCounterMulti(module, new uint[] { (uint)AID.XtremeSpectacular3, (uint)AID.XtremeSpectacular4 })
-{
-    public override void AddGlobalHints(GlobalHints hints)
-    {
-        
-        if (NumCasts > 0)
-            hints.Add("Raidwide damage - Healer Intensive! Use Cooldowns! (Xtreme Spectacular)");
-    }
-}
+sealed class XtremeSpectacularRaidwide(BossModule module)
+    : Components.RaidwideCastsDelay(
+        module,
+        new uint[] { (uint)AID.XtremeSpectacular2 }, // visual cast
+        new uint[] { (uint)AID.XtremeSpectacular3, (uint)AID.XtremeSpectacular4 }, // instant hits
+        delay: 0.0,
+        hint: "Raidwide damage - Healer intensive! Use cooldowns!");
 
 // =========================
 // Module

@@ -76,7 +76,7 @@ sealed class PulpingPulse(BossModule module) : Components.SimpleAOEs(module, (ui
 sealed class InsatiableThirst(BossModule module) : Components.RaidwideCastDelay(module, (uint)AID.InsatiableThirstCast, (uint)AID.InsatiableThirst, 3.2f);
 sealed class FinaleFataleEnrage(BossModule module) : Components.RaidwideCastDelay(module, (uint)AID.FinaleFataleEnrageCast, (uint)AID.FinaleFataleEnrage, 10f);
 
-[ModuleInfo(BossModuleInfo.Maturity.WIP,
+[ModuleInfo(BossModuleInfo.Maturity.Contributed,
 StatesType = typeof(M09SVampFataleStates),
 ConfigType = null,
 ObjectIDType = typeof(OID),
@@ -92,7 +92,7 @@ GroupType = BossModuleInfo.GroupType.CFC,
 GroupID = 1069u,
 NameID = 14300u,
 SortOrder = 1,
-PlanLevel = 0)]
+PlanLevel = 100)]
 public sealed class M09SVampFatale(WorldState ws, Actor primary) : BossModule(ws, primary, ArenaCenter, ArenaBounds)
 {
     public static readonly WPos ArenaCenter = new(100f, 100f);

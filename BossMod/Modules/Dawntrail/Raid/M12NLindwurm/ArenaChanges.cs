@@ -12,20 +12,20 @@ sealed class ArenaChanges(BossModule module) : BossComponent(module)
             if (state == 0x00020001u)
             {
                 var center = Arena.Center;
-                _rects.Add(new(center - new WDir(-15f, 7.5f), 5f, 7.5f));
-                _rects.Add(new(center - new WDir(-5f, -7.5f), 5f, 7.5f));
-                _rects.Add(new(center - new WDir(5f, 7.5f), 5f, 7.5f));
-                _rects.Add(new(center - new WDir(15f, -7.5f), 5f, 7.5f));
+                _rects.Add(new(center - new WDir(-15f, 7.5f), 4.95f, 7.45f));
+                _rects.Add(new(center - new WDir(-5f, -7.5f), 4.95f, 7.45f));
+                _rects.Add(new(center - new WDir(5f, 7.5f), 4.95f, 7.45f));
+                _rects.Add(new(center - new WDir(15f, -7.5f), 4.95f, 7.45f));
                 Arena.Bounds = new ArenaBoundsCustom([.. _rects]);
             }
             // other set of tiles break
             else if (state == 0x02000100u)
             {
                 var center = Arena.Center;
-                _rects.Add(new(center - new WDir(-15f, -7.5f), 5f, 7.5f));
-                _rects.Add(new(center - new WDir(-5f, 7.5f), 5f, 7.5f));
-                _rects.Add(new(center - new WDir(5f, -7.5f), 5f, 7.5f));
-                _rects.Add(new(center - new WDir(15f, 7.5f), 5f, 7.5f));
+                _rects.Add(new(center - new WDir(-15f, -7.5f), 4.95f, 7.45f));
+                _rects.Add(new(center - new WDir(-5f, 7.5f), 4.95f, 7.45f));
+                _rects.Add(new(center - new WDir(5f, -7.5f), 4.95f, 7.45f));
+                _rects.Add(new(center - new WDir(15f, 7.5f), 4.95f, 7.45f));
                 Arena.Bounds = new ArenaBoundsCustom([.. _rects]);
             }
             // arena partial fix through middle
@@ -35,7 +35,7 @@ sealed class ArenaChanges(BossModule module) : BossComponent(module)
                 Arena.Bounds = new ArenaBoundsCustom([.. _rects]);
             }
             // arena reset
-            else if (state is 0x10000004u or 0x00080004u)
+            else if (state is 0x10000004u or 0x00080004u or 0x00800004u)
             {
                 _rects.Clear();
                 Arena.Bounds = M12NLindwurm.ArenaBounds;
